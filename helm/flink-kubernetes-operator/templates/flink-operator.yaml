@@ -255,3 +255,20 @@ data:
   {{- index (.Values.defaultConfiguration) "log4j-console.properties" | nindent 4 -}}
 {{- end }}
 {{- end }}
+
+---
+{{- if and .Capabilities.APIVersions.Has "monitoring.coreos.com/v1/PodMonitor" .Values.metrics.port }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ include "flink-operator.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "flink-operator.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+    {{- include "flink-operator.selectorLabels" . | nindent 4 }}
+  podMetricsEndpoints:
+      - port: metrics
+{{- end }}
